@@ -1,1 +1,1 @@
-# Orleans.Security.SimpleCluster
+# Simple Cluster sample for Orleans.Security project.
