@@ -17,6 +17,7 @@ namespace SiloHost1
     {
         public static async Task Main(string[] args)
         {
+            var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
             try
             {
                 Console.Title = "SiloHost1";
@@ -29,8 +30,11 @@ namespace SiloHost1
             }
             catch (Exception ex)
             {
+                telemetryClient.TrackException(ex);
                 Console.WriteLine(ex);
             }
+
+            telemetryClient.Flush();
         }
 
         private static async Task<IHost> StartSilo()

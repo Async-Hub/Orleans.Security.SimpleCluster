@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="IdentityModel" Version="4.3.0" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.13.1" />
     <PackageReference Include="Microsoft.Orleans.Client" Version="3.1.7" />
     <PackageReference Include="Orleans.Security.Client" Version="1.1.0" />
   </ItemGroup>

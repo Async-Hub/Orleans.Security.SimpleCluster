@@ -1,5 +1,6 @@
 ﻿using Api.Orleans;
 using IdentityServer4.AccessTokenValidation;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,12 +13,29 @@ using Orleans.Security;
 
 namespace Api
 {
+    internal class MyTelemetryInitializer : ITelemetryInitializer
+    {
+        private readonly string _roleName;
+
+        public MyTelemetryInitializer()
+        {
+            _roleName = "Cluster Api";
+        }
+
+        public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
+        {
+            telemetry.Context.Cloud.RoleName = _roleName;
+            telemetry.Context.Cloud.RoleInstance = _roleName;
+        }
+    }
+
     public class Startup
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
             var apiIdentityServer4Info = new IdentityServer4Info("https://localhost:5001",
                 "Api1", @"TFGB=?Gf3UvH+Uqfu_5p", "Orleans");
 
@@ -44,6 +62,7 @@ namespace Api
 
                 return client;
             });
+            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

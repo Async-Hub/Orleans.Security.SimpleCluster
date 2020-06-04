@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using IdentityModel.Client;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -13,6 +14,22 @@ using Microsoft.VisualBasic;
 
 namespace WebClient
 {
+    internal class MyTelemetryInitializer : ITelemetryInitializer
+    {
+        private readonly string _roleName;
+
+        public MyTelemetryInitializer()
+        {
+            _roleName = "WebClient";
+        }
+
+        public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
+        {
+            telemetry.Context.Cloud.RoleName = _roleName;
+            telemetry.Context.Cloud.RoleInstance = _roleName;
+        }
+    }
+
     public class Startup
     {
         public Startup()
@@ -28,6 +45,7 @@ namespace WebClient
 
             services.AddControllersWithViews();
             services.AddHttpClient();
+            services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
 
             services.AddSingleton<IDiscoveryCache>(r =>
             {
@@ -71,6 +89,7 @@ namespace WebClient
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddControllersWithViews();
+            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
