@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Common;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -29,12 +30,12 @@ namespace WebClient.Controllers
         {
             var accessToken = await _httpContextAccessor.HttpContext.GetTokenAsync("access_token");
 
-            var httpClient = new HttpClient();
+            var httpClient = new HttpClient(HttpClientExtensions.CreateHttpClientHandler(true));
             httpClient.SetBearerToken(accessToken);
 
             string result;
 
-            var response = await httpClient.GetAsync("https://localhost:5002/api/User/Alice");
+            var response = await httpClient.GetAsync($"{Common.Config.ApiUrl}/api/User/Alice");
             if (response.IsSuccessStatusCode)
             {
                 result = await response.Content.ReadAsStringAsync();

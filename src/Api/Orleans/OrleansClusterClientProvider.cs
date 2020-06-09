@@ -29,7 +29,8 @@ namespace Api.Orleans
                     options.ClusterId = "Orleans.Security.Test";
                     options.ServiceId = "ServiceId1";
                 })
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IUserGrain).Assembly).WithReferences())
+                .ConfigureApplicationParts(parts => 
+                    parts.AddApplicationPart(typeof(IUserGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
                 .ConfigureServices(services =>
                 {
@@ -40,6 +41,7 @@ namespace Api.Orleans
                             config.ConfigureAccessTokenVerifierOptions = options =>
                             {
                                 options.InMemoryCacheEnabled = true;
+                                options.DisableCertificateValidation = true;
                             };
 
                             config.TracingEnabled = true;
@@ -52,11 +54,10 @@ namespace Api.Orleans
             return builder.Build();
         }
 
-        private static IClusterClient TryToConnect(IHttpContextAccessor httpContextAccessor, 
+        private static IClusterClient TryToConnect(IHttpContextAccessor httpContextAccessor, ILogger logger,
             IdentityServer4Info identityServer4Info)
         {
             var attempt = 0;
-            //var logger = loggerFactory.CreateLogger<OrleansClusterClientProvider>();
 
             while (true)
             {
@@ -65,7 +66,7 @@ namespace Api.Orleans
                     var client = Build(httpContextAccessor, identityServer4Info);
                     client.Connect().Wait();
 
-                    //logger.LogInformation("Client successfully connect to silo host");
+                    //logger.LogInformation("Api Client successfully connect to Silo host");
 
                     return client;
                 }
@@ -90,13 +91,13 @@ namespace Api.Orleans
         }
 
         public static void StartClientWithRetries(out IClusterClient client, 
-            IHttpContextAccessor httpContextAccessor, IdentityServer4Info identityServer4Info)
+            IHttpContextAccessor httpContextAccessor, ILogger logger, IdentityServer4Info identityServer4Info)
         {
             if (_client != null && _client.IsInitialized)
             {
                 client = _client;
             }
-            _client = TryToConnect(httpContextAccessor, identityServer4Info);
+            _client = TryToConnect(httpContextAccessor, logger, identityServer4Info);
             client = _client;
         }
     }

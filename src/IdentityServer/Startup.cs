@@ -30,7 +30,9 @@ namespace IdentityServer4
         {
             services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
             // configure identity server with in-memory stores, keys, clients and resources
-            services.AddIdentityServer()
+            services.AddIdentityServer(options =>
+                {
+                })
                 .AddDeveloperSigningCredential()
                 .AddInMemoryApiResources(IdentityServerConfig.GetApiResources())
                 .AddInMemoryIdentityResources(IdentityServerConfig.GetIdentityResources())

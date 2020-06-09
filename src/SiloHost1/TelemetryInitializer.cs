@@ -10,7 +10,7 @@ namespace SiloHost1
         {
             var configuration = TelemetryConfiguration.CreateDefault();
 
-            configuration.InstrumentationKey = "3719cf50-6237-47d3";
+            configuration.InstrumentationKey = "20d4b612-e229-4ba7";
             configuration.TelemetryInitializers.Add(new HttpDependenciesParsingTelemetryInitializer());
 
             var telemetryClient = new TelemetryClient(configuration);

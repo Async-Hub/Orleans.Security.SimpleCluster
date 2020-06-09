@@ -3,6 +3,9 @@ using System.Net;
 using System.Threading.Tasks;
 using Grains;
 using GrainsInterfaces;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Orleans;
@@ -13,11 +16,26 @@ using Orleans.Security.Clustering;
 
 namespace SiloHost1
 {
+    internal class MyTelemetryInitializer : ITelemetryInitializer
+    {
+        private readonly string _roleName;
+
+        public MyTelemetryInitializer()
+        {
+            _roleName = "SiloHost1";
+        }
+
+        public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
+        {
+            telemetry.Context.Cloud.RoleName = _roleName;
+            telemetry.Context.Cloud.RoleInstance = _roleName;
+        }
+    }
     internal static class Program
     {
         public static async Task Main(string[] args)
         {
-            var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
+            //var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
             try
             {
                 Console.Title = "SiloHost1";
@@ -30,20 +48,28 @@ namespace SiloHost1
             }
             catch (Exception ex)
             {
-                telemetryClient.TrackException(ex);
+                //telemetryClient.TrackException(ex);
                 Console.WriteLine(ex);
             }
 
-            telemetryClient.Flush();
+            //telemetryClient.Flush();
         }
 
         private static async Task<IHost> StartSilo()
         {
-            var identityServer4Info = new IdentityServer4Info("https://localhost:5001",
+            var identityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
                 "Orleans", "@3x3g*RLez$TNU!_7!QW", "Orleans");
 
             var builder = new HostBuilder()
-                .UseEnvironment(Environments.Development)
+                .UseEnvironment(Environments.Staging)
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
+                    services.AddApplicationInsightsTelemetryWorkerService(options =>
+                    {
+                        options.InstrumentationKey = "20d4b612-e229-4ba7";
+                    });
+                })
                 .UseOrleans((context, siloBuilder) =>
                 {
                     siloBuilder
@@ -66,6 +92,11 @@ namespace SiloHost1
                                 {
                                     config.ConfigureAuthorizationOptions = AuthorizationConfig.ConfigureOptions;
                                     config.TracingEnabled = true;
+                                    config.ConfigureAccessTokenVerifierOptions = options =>
+                                    {
+                                        //For not production environments only!
+                                        options.DisableCertificateValidation = true;
+                                    };
                                 });
                         });
                 })
