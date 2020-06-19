@@ -25,7 +25,7 @@ namespace SiloHost1
             _roleName = "SiloHost1";
         }
 
-        public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
+        public void Initialize(ITelemetry telemetry)
         {
             telemetry.Context.Cloud.RoleName = _roleName;
             telemetry.Context.Cloud.RoleInstance = _roleName;
@@ -35,7 +35,7 @@ namespace SiloHost1
     {
         public static async Task Main(string[] args)
         {
-            //var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
+            var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
             try
             {
                 Console.Title = "SiloHost1";
@@ -48,17 +48,17 @@ namespace SiloHost1
             }
             catch (Exception ex)
             {
-                //telemetryClient.TrackException(ex);
+                telemetryClient.TrackException(ex);
                 Console.WriteLine(ex);
             }
 
-            //telemetryClient.Flush();
+            telemetryClient.Flush();
         }
 
         private static async Task<IHost> StartSilo()
         {
             var identityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
-                "Orleans", "@3x3g*RLez$TNU!_7!QW", "Orleans");
+                "Cluster", "@3x3g*RLez$TNU!_7!QW", "Cluster");
 
             var builder = new HostBuilder()
                 .UseEnvironment(Environments.Staging)
@@ -67,7 +67,7 @@ namespace SiloHost1
                     services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
                     services.AddApplicationInsightsTelemetryWorkerService(options =>
                     {
-                        options.InstrumentationKey = "20d4b612-e229-4ba7";
+                        options.InstrumentationKey = Common.Config.InstrumentationKey;
                     });
                 })
                 .UseOrleans((context, siloBuilder) =>
@@ -102,7 +102,11 @@ namespace SiloHost1
                 })
                 // Configure logging with any logging framework that supports Microsoft.Extensions.Logging.
                 // In this particular case it logs using the Microsoft.Extensions.Logging.Console package.
-                .ConfigureLogging(logging => logging.AddConsole());
+                .ConfigureLogging(logging =>
+                {
+                    logging.AddConsole();
+                    logging.AddApplicationInsights(Common.Config.InstrumentationKey);
+                });
 
             var host = builder.Build();
             await host.StartAsync();

@@ -10,26 +10,27 @@ namespace NativeClient
 {
     public class LoopbackHttpListener : IDisposable
     {
-        const int DefaultTimeout = 60 * 5; // 5 mins (in seconds)
+        private const int DefaultTimeout = 60 * 5;
 
-        IWebHost _host;
-        TaskCompletionSource<string> _source = new TaskCompletionSource<string>();
-        string _url;
+        private readonly IWebHost _host;
+        private readonly TaskCompletionSource<string> _source = new TaskCompletionSource<string>();
 
-        public string Url => _url;
+        public string Url { get; }
 
         public LoopbackHttpListener(int port, string path = null)
         {
-            path = path ?? String.Empty;
+            path ??= string.Empty;
+            
             if (path.StartsWith("/")) path = path.Substring(1);
 
-            _url = $"http://127.0.0.1:{port}/{path}";
+            Url = $"http://127.0.0.1:{port}/{path}";
 
             _host = new WebHostBuilder()
                 .UseKestrel()
-                .UseUrls(_url)
+                .UseUrls(Url)
                 .Configure(Configure)
                 .Build();
+            
             _host.Start();
         }
 
@@ -42,7 +43,7 @@ namespace NativeClient
             });
         }
 
-        void Configure(IApplicationBuilder app)
+        private void Configure(IApplicationBuilder app)
         {
             app.Run(async ctx =>
             {
@@ -52,17 +53,16 @@ namespace NativeClient
                 }
                 else if (ctx.Request.Method == "POST")
                 {
-                    if (!ctx.Request.ContentType.Equals("application/x-www-form-urlencoded", StringComparison.OrdinalIgnoreCase))
+                    if (!ctx.Request.ContentType.Equals("application/x-www-form-urlencoded", 
+                        StringComparison.OrdinalIgnoreCase))
                     {
                         ctx.Response.StatusCode = 415;
                     }
                     else
                     {
-                        using (var sr = new StreamReader(ctx.Request.Body, Encoding.UTF8))
-                        {
-                            var body = await sr.ReadToEndAsync();
-                            SetResult(body, ctx);
-                        }
+                        using var sr = new StreamReader(ctx.Request.Body, Encoding.UTF8);
+                        var body = await sr.ReadToEndAsync();
+                        SetResult(body, ctx);
                     }
                 }
                 else

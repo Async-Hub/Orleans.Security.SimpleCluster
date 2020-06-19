@@ -22,7 +22,7 @@ namespace NativeClient
                 FilterClaims = false,
                 Flow = OidcClientOptions.AuthenticationFlow.AuthorizationCode,
                 LoadProfile = true,
-                Scope = "openid profile Api1 Orleans",
+                Scope = "openid profile Api1 Cluster",
                 RedirectUri = Config.NativeClientUrl,
                 RefreshTokenInnerHttpHandler = handler,
                 ResponseMode = OidcClientOptions.AuthorizeResponseMode.Redirect

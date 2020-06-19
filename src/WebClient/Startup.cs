@@ -67,7 +67,7 @@ namespace WebClient
                     options.SaveTokens = true;
 
                     options.Scope.Add("Api1");
-                    options.Scope.Add("Orleans");
+                    options.Scope.Add("Cluster");
                     options.Scope.Add("Api1.Read");
                     options.Scope.Add("Api1.Write");
 

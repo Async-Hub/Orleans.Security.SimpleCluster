@@ -10,7 +10,7 @@ namespace ConsoleClient
         {
             var configuration = TelemetryConfiguration.CreateDefault();
 
-            configuration.InstrumentationKey = "3719cf50-6237-47d3";
+            configuration.InstrumentationKey = Common.Config.InstrumentationKey;
 
             var telemetryClient = new TelemetryClient(configuration);
             using (InitializeDependencyTracking(configuration))

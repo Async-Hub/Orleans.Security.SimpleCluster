@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -26,7 +19,7 @@ namespace Api
             host.Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureLogging(logging =>
                 {
@@ -42,7 +35,7 @@ namespace Api
                                 // standalone package Microsoft.Extensions.Logging.ApplicationInsights
                                 // or if you want to capture logs from early in the application startup 
                                 // pipeline from Startup.cs or Program.cs itself.
-                                builder.AddApplicationInsights("20d4b612-e229-4ba7");
+                                builder.AddApplicationInsights(Common.Config.InstrumentationKey);
 
                                 // Adding the filter below to ensure logs of all severity from Program.cs
                                 // is sent to ApplicationInsights.

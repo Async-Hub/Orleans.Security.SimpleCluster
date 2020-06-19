@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using IdentityModel.Client;
 
-namespace ConsoleClient
+namespace DesktopClient
 {
     internal static class TokenProvider
     {
@@ -28,10 +27,10 @@ namespace ConsoleClient
 
             var passwordTokenRequest = new PasswordTokenRequest()
             {
-                ClientId = "ConsoleClient",
-                ClientSecret = "KHG+TZ8htVx2h3^!vJ65",
+                ClientId = "DesktopClient",
+                ClientSecret = "AHG+TdfghVx2h3^!vJ65",
                 Address = discoveryResponse.TokenEndpoint,
-                UserName = "Alice",
+                UserName = "alice",
                 Password = "Pass123$",
                 Scope = "Api1 Api1.Read Api1.Write Cluster"
             };

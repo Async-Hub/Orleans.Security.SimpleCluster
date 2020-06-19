@@ -9,6 +9,7 @@ namespace ConsoleClient
     {
         private static async Task Main(string[] args)
         {
+            Console.Title = "ConsoleClient";
             var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
 
             Console.WriteLine("Please press 's' to start.");
@@ -18,18 +19,19 @@ namespace ConsoleClient
             {
                 try
                 {
-                    var accessToken = await TokenProvider.RetrieveToken("https://localhost:5001");
+                    var accessToken = await TokenProvider.RetrieveToken(Common.Config.IdentityServerUrl);
                     Console.WriteLine($"AccessToken: {accessToken}");
 
-                    var httpClient = new HttpClient
+                    var httpClientHandler = Common.HttpClientExtensions.CreateHttpClientHandler(true);
+                    var httpClient = new HttpClient(httpClientHandler)
                     {
-                        BaseAddress = new Uri("https://localhost:5002")
+                        BaseAddress = new Uri(Common.Config.ApiUrl),
                     };
                     httpClient.SetBearerToken(accessToken);
 
                     // Call API
                     // Emulate an issue.
-                    const int userId = 1;
+                    var userId = "Alice";
                     var response = await httpClient.GetAsync($"/api/user/{userId}");
                     if (!response.IsSuccessStatusCode)
                     {

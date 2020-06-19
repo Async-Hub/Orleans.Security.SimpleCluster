@@ -26,8 +26,8 @@ namespace NativeClient
                     Console.WriteLine($"Identity Token: {loginResult.IdentityToken}");
                     Console.WriteLine($"Access Token: {loginResult.AccessToken}");
 
-                    //var userProfile = await TryGetUserProfile(loginResult.AccessToken);
-                    //Console.WriteLine(userProfile);
+                    var userProfile = await TryGetUserProfile(loginResult.AccessToken);
+                    Console.WriteLine(userProfile);
                 }
                 
             }
