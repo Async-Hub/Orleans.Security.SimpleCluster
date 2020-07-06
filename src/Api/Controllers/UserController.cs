@@ -30,11 +30,11 @@ namespace Api.Controllers
             }
             catch (OrleansClusterUnauthorizedAccessException)
             {
-                return Unauthorized("Access to the requested resource denied.");
+                return Unauthorized(LogMessages.AccessDenied);
             }
             catch (UnauthorizedAccessException)
             {
-                return Unauthorized("Access to the requested resource denied.");
+                return Unauthorized(LogMessages.AccessDenied);
             }
         }
     }

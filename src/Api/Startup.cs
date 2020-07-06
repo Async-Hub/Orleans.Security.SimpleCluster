@@ -1,14 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using Api.Orleans;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using IdentityServer4.AccessTokenValidation;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.SnapshotCollector;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -24,14 +18,6 @@ using static Common.HttpClientExtensions;
 
 namespace Api
 {
-    public class CustomDelegatingHandler : DelegatingHandler
-    {
-        public CustomDelegatingHandler()
-        {
-            this.InnerHandler = CreateHttpClientHandler(true);
-        }
-    }
-
     public class Startup
     {
         private readonly IWebHostEnvironment _env;
@@ -48,12 +34,6 @@ namespace Api
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            //Azure Application Insights
-            services.AddSnapshotCollector((configuration) =>
-                _configuration.Bind(nameof(SnapshotCollectorConfiguration), configuration));
-            services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
-            services.AddApplicationInsightsTelemetry();
-
             //IdentityServer4 credentials. Do not use this for production!
             var apiIdentityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
                 "Api1", @"TFGB=?Gf3UvH+Uqfu_5p", "Cluster");
@@ -86,29 +66,7 @@ namespace Api
                         oAuth2IntrospectionOptions.ClientId = apiIdentityServer4Info.ClientId;
                         oAuth2IntrospectionOptions.ClientSecret = apiIdentityServer4Info.ClientSecret;
                         oAuth2IntrospectionOptions.SaveToken = true;
-
-                        //referenceOptions.
-                        //referenceOptions.IntrospectionBackChannelHandler = CreateHttpClientHandler(true);
-                        //referenceOptions..IntrospectionDiscoveryHandler = CreateHttpClientHandler(true);
                     });
-                //.AddIdentityServerAuthentication(options =>
-                //{
-                //    options.Authority = apiIdentityServer4Info.Url;
-                //    //options.RequireHttpsMetadata = false;
-                //    options.ApiName = apiIdentityServer4Info.ClientId;
-                //    options.ApiSecret = apiIdentityServer4Info.ClientSecret;
-                //    options.SupportedTokens = SupportedTokens.Both;
-                //    options.SaveToken = true;
-                    
-                //    //if (_env.IsDevelopment() || _env.IsStaging())
-                //    //{
-                //    //    options.JwtBackChannelHandler = CreateHttpClientHandler(true);
-                //    //}
-
-                //    options.JwtBackChannelHandler = CreateHttpClientHandler(true);
-                //    options.IntrospectionBackChannelHandler = CreateHttpClientHandler(true);
-                //    options..IntrospectionDiscoveryHandler = CreateHttpClientHandler(true);
-                //});
 
             services.AddControllers();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();

@@ -2,8 +2,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using IdentityModel.Client;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.SnapshotCollector;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -32,16 +30,11 @@ namespace WebClient
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSnapshotCollector((configuration) =>
-                _configuration.Bind(nameof(SnapshotCollectorConfiguration), configuration));
-
-            services.AddControllersWithViews();
             services.AddHttpClient();
-            services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
 
-            services.AddSingleton<IDiscoveryCache>(r =>
+            services.AddSingleton<IDiscoveryCache>(serviceProvider =>
             {
-                var factory = r.GetRequiredService<IHttpClientFactory>();
+                var factory = serviceProvider.GetRequiredService<IHttpClientFactory>();
 
                 return new DiscoveryCache(Common.Config.IdentityServerUrl,
                     () => factory.CreateClient());
@@ -79,7 +72,6 @@ namespace WebClient
 
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddControllersWithViews();
-            services.AddApplicationInsightsTelemetry();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

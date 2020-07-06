@@ -1,0 +1,5 @@
+.load C:\Users\U1\.dotnet\tools\.store\dotnet-sos\3.1.122203\dotnet-sos\3.1.122203\tools\netcoreapp2.1\any\win-x86\sos.dll
+.foreach(ex {!DumpHeap -type Exception -short}){!pe ex;.echo}
+!pe
+!sxe
+!PrintException -nested /d

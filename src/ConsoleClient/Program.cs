@@ -31,8 +31,8 @@ namespace ConsoleClient
 
                     // Call API
                     // Emulate an issue.
-                    var userId = "Alice";
-                    var response = await httpClient.GetAsync($"/api/user/{userId}");
+                    const string userId = "Alice";
+                    var response = await httpClient.GetAsync($"/api/secret/{userId}");
                     if (!response.IsSuccessStatusCode)
                     {
                         Console.WriteLine(response.StatusCode);

@@ -1,4 +1,5 @@
-﻿using Microsoft.ApplicationInsights.Extensibility;
+﻿using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
 
 namespace WebClient
 {
@@ -11,7 +12,7 @@ namespace WebClient
             _roleName = "WebClient";
         }
 
-        public void Initialize(Microsoft.ApplicationInsights.Channel.ITelemetry telemetry)
+        public void Initialize(ITelemetry telemetry)
         {
             telemetry.Context.Cloud.RoleName = _roleName;
             telemetry.Context.Cloud.RoleInstance = _roleName;
