@@ -11,5 +11,9 @@ namespace Common
         public static string ApiUrl => "https://localhost:5002";
         public static string IdentityServerUrl => "https://localhost:5001";
         public static string WebClientUrl => "https://localhost:5004";
+
+        //public static string ApiUrl => "http://api.appi.asynchub.org";
+        //public static string IdentityServerUrl => "https://identity.appi.asynchub.org";
+        //public static string WebClientUrl => "http://webclient.appi.asynchub.org";
     }
 }

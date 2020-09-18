@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="IdentityModel" Version="4.3.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.14.0" />
-    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.14.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.15.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.15.0" />
   </ItemGroup>
 
   <ItemGroup>
