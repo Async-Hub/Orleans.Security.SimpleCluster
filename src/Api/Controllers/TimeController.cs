@@ -7,7 +7,7 @@ using Orleans;
 
 namespace Api.Controllers
 {
-    [ApiController, Authorize]
+    [ApiController]
     [Route("api/[controller]")]
     public class TimeController : Controller
     {

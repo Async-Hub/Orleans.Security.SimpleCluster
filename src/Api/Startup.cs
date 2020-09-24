@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using Api.Orleans;
+using Common;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Builder;
@@ -23,7 +25,8 @@ namespace Api
         private readonly IWebHostEnvironment _env;
         private readonly IConfiguration _configuration;
 
-        public Startup(IWebHostEnvironment env, IConfiguration configuration)
+        public Startup(IWebHostEnvironment env, 
+            IConfiguration configuration)
         {
             _env = env;
             _configuration = configuration;
@@ -39,6 +42,10 @@ namespace Api
                 "Api1", @"TFGB=?Gf3UvH+Uqfu_5p", "Cluster");
             var clusterIdentityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
                 "Cluster", "@3x3g*RLez$TNU!_7!QW", "Cluster");
+
+            // Read Azure Storage connection string.
+            var simpleClusterAzureStorageConnection =
+                Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterAzureStorageConnection);
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme,
@@ -76,10 +83,12 @@ namespace Api
             // ReSharper disable once RedundantTypeArgumentsOfMethod
             services.AddSingleton<IClusterClient>(serviceProvider =>
             {
+                var logger = serviceProvider.GetRequiredService<ILogger<IClusterClient>>();
                 OrleansClusterClientProvider.StartClientWithRetries(out var client,
                     serviceProvider.GetService<IHttpContextAccessor>(), 
-                    serviceProvider.GetService<ILogger>(),
-                    clusterIdentityServer4Info);
+                    logger,
+                    clusterIdentityServer4Info,
+                    simpleClusterAzureStorageConnection);
 
                 return client;
             });

@@ -1,0 +1,234 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "containerGroupName": {
+      "type": "string",
+      "defaultValue": "acg-aci-sample",
+      "metadata": {
+        "description": "Name of container group name."
+      }
+    }
+  },
+  "variables": {
+    "storageAccountName": "stacgaci",
+    "containerIPv4Address": "",
+    "InstrumentationKey": "",
+    "webclientContainerName": "webclient",
+    "webclientContainerImage": "acraci.azurecr.io/webclient:latest",
+    "identityserverContainerName": "identityserver",
+    "identityserverContainerImage": "acraci.azurecr.io/identityserver:latest",
+    "silohost1ContainerName": "silohost1",
+    "silohost1ContainerImage": "acraci.azurecr.io/silohost1:latest",
+    "apiContainerName": "api",
+    "apiContainerImage": "acraci.azurecr.io/api:latest"
+  },
+  "resources": [
+    {
+      "name": "[variables('storageAccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2019-06-01",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "location": "[resourceGroup().location]"
+    },
+    {
+      "name": "[parameters('containerGroupName')]",
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2019-12-01",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+      ],
+      "properties": {
+        "containers": [
+          {
+            "name": "[variables('webclientContainerName')]",
+            "properties": {
+              "image": "[variables('webclientContainerImage')]",
+              "resources": {
+                "requests": {
+                  "cpu": 1,
+                  "memoryInGb": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 8081
+                },
+                {
+                  "port": 8082
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
+                  "value": "[concat('http://',variables('containerIPv4Address'),':','8083')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_API_SERVER_URL",
+                  "value": "[concat('http://',variables('containerIPv4Address'),':','8085')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
+                  "value": "[variables('InstrumentationKey')]"
+                }
+              ]
+            }
+          },
+          {
+            "name": "[variables('identityserverContainerName')]",
+            "properties": {
+              "image": "[variables('identityserverContainerImage')]",
+              "resources": {
+                "requests": {
+                  "cpu": 1,
+                  "memoryInGb": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 8083
+                },
+                {
+                  "port": 8084
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "SIMPLE_CLUSTER_WEB_CLIENT_SERVER_URL",
+                  "value": "[concat('http://',variables('containerIPv4Address'),':','8081')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
+                  "value": "[variables('InstrumentationKey')]"
+                }
+              ]
+            }
+          },
+          {
+            "name": "[variables('silohost1ContainerName')]",
+            "properties": {
+              "image": "[variables('silohost1ContainerImage')]",
+              "resources": {
+                "requests": {
+                  "cpu": 1,
+                  "memoryInGb": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 11111
+                },
+                {
+                  "port": 30000
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "SIMPLE_CLUSTER_AZURE_STORAGE_CONNECTION",
+                  "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId(resourceGroup().name,'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
+                  "value": "[concat('http://',variables('containerIPv4Address'),':','8083')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
+                  "value": "[variables('InstrumentationKey')]"
+                }
+              ]
+            }
+          },
+          {
+            "name": "[variables('apiContainerName')]",
+            "properties": {
+              "image": "[variables('apiContainerImage')]",
+              "resources": {
+                "requests": {
+                  "cpu": 1,
+                  "memoryInGb": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 8085
+                },
+                {
+                  "port": 8086
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "SIMPLE_CLUSTER_AZURE_STORAGE_CONNECTION",
+                  "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId(resourceGroup().name,'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
+                  "value": "[concat('http://',variables('containerIPv4Address'),':','8085')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
+                  "value": "[variables('InstrumentationKey')]"
+                }
+              ]
+            }
+          }
+        ],
+        "imageRegistryCredentials": [
+          {
+            "server": "acraci.azurecr.io",
+            "username": "acraci",
+            "password": "w3fth1G90BZ40n/TFZmLqPy2w86Xcdus"
+          }
+        ],
+        "osType": "Linux",
+        "ipAddress": {
+          "type": "Public",
+          "ports": [
+            {
+              "protocol": "tcp",
+              "port": 8081
+            },
+            {
+              "protocol": "tcp",
+              "port": 8082
+            },
+            {
+              "protocol": "tcp",
+              "port": 8083
+            },
+            {
+              "protocol": "tcp",
+              "port": 8084
+            },
+            {
+              "protocol": "tcp",
+              "port": 8085
+            },
+            {
+              "protocol": "tcp",
+              "port": 8086
+            },
+            {
+              "protocol": "tcp",
+              "port": 11111
+            },
+            {
+              "protocol": "tcp",
+              "port": 30000
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "containerIPv4Address": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', parameters('containerGroupName'))).ipAddress.ip]"
+    }
+  }
+}

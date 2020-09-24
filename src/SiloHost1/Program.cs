@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Common;
 using Grains;
 using GrainsInterfaces;
-using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,21 +16,6 @@ using Orleans.Security.Clustering;
 
 namespace SiloHost1
 {
-    internal class MyTelemetryInitializer : ITelemetryInitializer
-    {
-        private readonly string _roleName;
-
-        public MyTelemetryInitializer()
-        {
-            _roleName = "SiloHost1";
-        }
-
-        public void Initialize(ITelemetry telemetry)
-        {
-            telemetry.Context.Cloud.RoleName = _roleName;
-            telemetry.Context.Cloud.RoleInstance = _roleName;
-        }
-    }
     internal static class Program
     {
         public static async Task Main(string[] args)
@@ -39,12 +24,18 @@ namespace SiloHost1
             try
             {
                 Console.Title = "SiloHost1";
+                // Read Azure Storage connection string.
+                var simpleClusterAzureStorageConnection =
+                    Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterAzureStorageConnection);
 
-                var host = await StartSilo();
+                var host = await StartSilo(simpleClusterAzureStorageConnection);
+
+#if DEBUG
                 Console.WriteLine("Press Enter to terminate...");
                 Console.ReadLine();
 
-                await host.StopAsync();
+                await host.StopAsync();          
+#endif
             }
             catch (Exception ex)
             {
@@ -55,7 +46,7 @@ namespace SiloHost1
             telemetryClient.Flush();
         }
 
-        private static async Task<IHost> StartSilo()
+        private static async Task<IHost> StartSilo(string simpleClusterAzureStorageConnection)
         {
             var identityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
                 "Cluster", "@3x3g*RLez$TNU!_7!QW", "Cluster");
@@ -73,16 +64,35 @@ namespace SiloHost1
                 .UseOrleans((context, siloBuilder) =>
                 {
                     siloBuilder
-                        // Use localhost clustering for a single local silo
-                        .UseLocalhostClustering()
+                        //.UseTransactions()
+                        .UseAzureStorageClustering(options =>
+                        {
+                            options.ConnectionString = simpleClusterAzureStorageConnection;
+                        })
                         // Configure ClusterId and ServiceId
                         .Configure<ClusterOptions>(options =>
                         {
                             options.ClusterId = "Orleans.Security.Test";
                             options.ServiceId = "ServiceId1";
                         })
+                        .ConfigureEndpoints(Dns.GetHostName(),siloPort: 11111, gatewayPort: 30000)
                         // Configure connectivity
-                        .Configure<EndpointOptions>(options => options.AdvertisedIPAddress = IPAddress.Loopback)
+                        //.Configure<EndpointOptions>(options =>
+                        //    {
+                        //        // Port to use for Silo-to-Silo
+                        //        options.SiloPort = 11111;
+                        //        // Port to use for the gateway
+                        //        options.GatewayPort = 30000;
+                        //        // IP Address to advertise in the cluster
+                        //        options.AdvertisedIPAddress = IPAddress.Parse("51.105.185.51");
+                        //        // The socket used for silo-to-silo will bind to this endpoint
+                        //        options.GatewayListeningEndpoint = 
+                        //            new IPEndPoint(IPAddress.Any, 40000);
+                        //        // The socket used by the gateway will bind to this endpoint
+                        //        options.SiloListeningEndpoint =  
+                        //            new IPEndPoint(IPAddress.Any, 50000);
+
+                        //})
                         .ConfigureApplicationParts(parts =>
                             parts.AddApplicationPart(typeof(UserGrain).Assembly).WithReferences())
                         .ConfigureServices(services =>
@@ -102,10 +112,10 @@ namespace SiloHost1
                 })
                 // Configure logging with any logging framework that supports Microsoft.Extensions.Logging.
                 // In this particular case it logs using the Microsoft.Extensions.Logging.Console package.
-                .ConfigureLogging(logging =>
+                .ConfigureLogging(loggingBuilder =>
                 {
-                    logging.AddConsole();
-                    logging.AddApplicationInsights(Common.Config.InstrumentationKey);
+                    loggingBuilder.AddConsole();
+                    loggingBuilder.AddApplicationInsights(Common.Config.InstrumentationKey);
                 });
 
             var host = builder.Build();

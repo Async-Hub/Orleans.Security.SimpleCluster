@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
+using Orleans.Hosting;
 using Orleans.Runtime;
 using Orleans.Security;
 using Orleans.Security.Client;
@@ -19,11 +20,16 @@ namespace Api.Orleans
 
         private static readonly int _initializeAttemptsBeforeFailing = 5;
 
+        private static string _simpleClusterAzureStorageConnection;
+
         private static IClusterClient Build(IHttpContextAccessor contextAccessor, 
             IdentityServer4Info identityServer4Info)
         {
             var builder = new ClientBuilder()
-                .UseLocalhostClustering()
+                .UseAzureStorageClustering(options =>
+                {
+                    options.ConnectionString = _simpleClusterAzureStorageConnection;
+                })
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "Orleans.Security.Test";
@@ -54,7 +60,8 @@ namespace Api.Orleans
             return builder.Build();
         }
 
-        private static IClusterClient TryToConnect(IHttpContextAccessor httpContextAccessor, ILogger logger,
+        private static IClusterClient TryToConnect(IHttpContextAccessor httpContextAccessor, 
+            ILogger logger,
             IdentityServer4Info identityServer4Info)
         {
             var attempt = 0;
@@ -66,7 +73,7 @@ namespace Api.Orleans
                     var client = Build(httpContextAccessor, identityServer4Info);
                     client.Connect().Wait();
 
-                    //logger.LogInformation("Api Client successfully connect to Silo host");
+                    logger.LogInformation("Api Client successfully connect to Silo host");
 
                     return client;
                 }
@@ -75,7 +82,7 @@ namespace Api.Orleans
                     if (ex.InnerException is SiloUnavailableException)
                     {
                         attempt++;
-                        //logger.LogError(ex, ex.Message);
+                        logger.LogError(ex, ex.Message);
 
                         if (attempt > _initializeAttemptsBeforeFailing)
                         {
@@ -85,14 +92,18 @@ namespace Api.Orleans
                         Task.Delay(TimeSpan.FromSeconds(1));
                     }
 
-                    //logger.LogError(ex, ex.Message);
+                    logger.LogError(ex, ex.Message);
                 }
             }
         }
 
         public static void StartClientWithRetries(out IClusterClient client, 
-            IHttpContextAccessor httpContextAccessor, ILogger logger, IdentityServer4Info identityServer4Info)
+            IHttpContextAccessor httpContextAccessor, ILogger logger, 
+            IdentityServer4Info identityServer4Info,
+            string simpleClusterAzureStorageConnection)
         {
+            _simpleClusterAzureStorageConnection = simpleClusterAzureStorageConnection;
+
             if (_client != null && _client.IsInitialized)
             {
                 client = _client;
