@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Orleans;
 using System.Threading.Tasks;
+using Orleans.Security;
 
 namespace Api.Controllers
 {
@@ -27,9 +28,13 @@ namespace Api.Controllers
             {
                 return await grain.TakeSecret();
             }
+            catch (OrleansClusterUnauthorizedAccessException)
+            {
+                return Unauthorized(LogMessages.AccessDenied);
+            }
             catch (UnauthorizedAccessException)
             {
-                return Unauthorized("Access to the requested resource denied.");
+                return Unauthorized(LogMessages.AccessDenied);
             }
         }
     }

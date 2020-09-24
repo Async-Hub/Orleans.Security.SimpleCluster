@@ -19,7 +19,7 @@ namespace IdentityServer4
             api1.Scopes.Add(new Scope("Api1.Read"));
             api1.Scopes.Add(new Scope("Api1.Write"));
 
-            var orleans = new ApiResource("Orleans");
+            var orleans = new ApiResource("Cluster");
             orleans.ApiSecrets.Add(new Secret("@3x3g*RLez$TNU!_7!QW".Sha256()));
             resources.Add(orleans);
 
@@ -33,6 +33,7 @@ namespace IdentityServer4
                 new Client
                 {
                     ClientId = "ConsoleClient",
+                    ClientName = "Console Client",
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
                     ClientSecrets =
                     {
@@ -41,14 +42,58 @@ namespace IdentityServer4
                     Claims = new List<Claim> {new Claim(JwtClaimTypes.Role, "Admin")},
                     AllowedScopes =
                     {
-                        "Api1", "Api1.Read", "Api1.Write", "Orleans",
+                        "Api1", "Api1.Read", "Api1.Write", "Cluster",
                         JwtClaimTypes.Email,
                         JwtClaimTypes.Role
-                    }
+                    },
+                    AllowOfflineAccess = true,
+                },
+                new Client
+                {
+                    ClientId = "DesktopClient",
+                    ClientName = "Desktop Client",
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPasswordAndClientCredentials,
+                    ClientSecrets =
+                    {
+                        new Secret("AHG+TdfghVx2h3^!vJ65".Sha256())
+                    },
+                    Claims = new List<Claim> {new Claim(JwtClaimTypes.Role, "Admin")},
+                    AllowedScopes =
+                    {
+                        "Api1", "Api1.Read", "Api1.Write", "Cluster",
+                        JwtClaimTypes.Email,
+                        JwtClaimTypes.Role
+                    },
+                    AllowOfflineAccess = true,
+                },
+                new Client
+                {
+                    ClientId = "NativeClient",
+                    ClientName = "Native Client",
+                    ClientUri = Common.Config.NativeClientUrl,
+                    ClientSecrets = {
+                        new Secret("KHG+TZ8aaVx2h3^!vJ65".Sha256())
+                    },
+                    AllowedCorsOrigins = new List<string>(){Common.Config.NativeClientUrl},
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RedirectUris = { Common.Config.NativeClientUrl },
+                    PostLogoutRedirectUris = { Common.Config.NativeClientUrl },
+                    RequireClientSecret = true,
+                    RequirePkce = true,
+                    AllowedScopes = 
+                    { 
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        "Api1", "Api1.Read", "Api1.Write", "Cluster"
+                    },
+                    AllowOfflineAccess = true,
+                    RefreshTokenUsage = TokenUsage.ReUse
                 },
                 new Client
                 {
                     ClientId = "WebClient",
+                    ClientName = "Web Client",
                     AccessTokenType = AccessTokenType.Reference,
                     AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
                     AllowOfflineAccess = true,
@@ -61,9 +106,9 @@ namespace IdentityServer4
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
-                        "Api1", "Api1.Read", "Api1.Write", "Orleans"
+                        "Api1", "Api1.Read", "Api1.Write", "Cluster"
                     },
-                    RedirectUris = {"https://localhost:5004/signin-oidc"}
+                    RedirectUris = { $"{Common.Config.WebClientUrl}/signin-oidc" }
                 }
             };
         }

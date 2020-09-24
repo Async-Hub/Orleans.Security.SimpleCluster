@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using IdentityModel.Client;
@@ -8,62 +7,51 @@ namespace ConsoleClient
 {
     internal static class Program
     {
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
+            Console.Title = "ConsoleClient";
+            var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
+
             Console.WriteLine("Please press 's' to start.");
+            telemetryClient.TrackTrace("Hello World!");
 
-            if (Console.ReadKey().Key == ConsoleKey.S)
+            while (Console.ReadKey().Key == ConsoleKey.S)
             {
-                var discoveryClient = new HttpClient
+                try
                 {
-                    BaseAddress = new Uri("https://localhost:5001")
-                };
+                    var accessToken = await TokenProvider.RetrieveToken(Common.Config.IdentityServerUrl);
+                    Console.WriteLine($"AccessToken: {accessToken}");
 
-                var discoveryResponse = await discoveryClient.GetDiscoveryDocumentAsync();
+                    var httpClientHandler = Common.HttpClientExtensions.CreateHttpClientHandler(true);
+                    var httpClient = new HttpClient(httpClientHandler)
+                    {
+                        BaseAddress = new Uri(Common.Config.ApiUrl),
+                    };
+                    httpClient.SetBearerToken(accessToken);
 
-                if (discoveryResponse.IsError)
-                {
-                    Console.WriteLine(discoveryResponse.Error);
-                    return;
+                    // Call API
+                    // Emulate an issue.
+                    const string userId = "Alice";
+                    var response = await httpClient.GetAsync($"/api/secret/{userId}");
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine(response.StatusCode);
+                        telemetryClient.TrackEvent(response.ReasonPhrase);
+                    }
+                    else
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine(content);
+                    }
                 }
-
-
-                var client = new HttpClient();
-
-                var passwordTokenRequest = new PasswordTokenRequest()
+                catch (Exception e)
                 {
-                    ClientId = "ConsoleClient",
-                    ClientSecret = "KHG+TZ8htVx2h3^!vJ65",
-                    Address = discoveryResponse.TokenEndpoint,
-                    UserName = "Alice",
-                    Password = "Pass123$",
-                    Scope = "Api1 Api1.Read Api1.Write Orleans"
-                };
-
-                var tokenResponse = await client.RequestPasswordTokenAsync(passwordTokenRequest);
-
-                if (tokenResponse.IsError)
-                {
-                    Console.WriteLine(tokenResponse.Error);
-                    return;
-                }
-
-                Console.WriteLine(tokenResponse.Json);
-
-                // Call API
-                client.SetBearerToken(tokenResponse.AccessToken);
-
-                var response = await client.GetAsync("https://localhost:5002/api/user/1");
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine(response.StatusCode);
-                }
-                else
-                {
-                    var content = response.Content.ReadAsStringAsync().Result;
-                    Console.WriteLine(content);
+                    Console.WriteLine(e);
+                    telemetryClient.TrackException(e);
                 }
             }
+
+            telemetryClient.Flush();
         }
     }
 }

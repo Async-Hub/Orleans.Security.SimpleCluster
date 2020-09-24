@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Orleans;
 using Orleans.Configuration;
+using Orleans.Hosting;
 using Orleans.Runtime;
 using Orleans.Security;
 using Orleans.Security.Client;
@@ -19,17 +20,23 @@ namespace Api.Orleans
 
         private static readonly int _initializeAttemptsBeforeFailing = 5;
 
+        private static string _simpleClusterAzureStorageConnection;
+
         private static IClusterClient Build(IHttpContextAccessor contextAccessor, 
             IdentityServer4Info identityServer4Info)
         {
             var builder = new ClientBuilder()
-                .UseLocalhostClustering()
+                .UseAzureStorageClustering(options =>
+                {
+                    options.ConnectionString = _simpleClusterAzureStorageConnection;
+                })
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "Orleans.Security.Test";
                     options.ServiceId = "ServiceId1";
                 })
-                .ConfigureApplicationParts(parts => parts.AddApplicationPart(typeof(IUserGrain).Assembly).WithReferences())
+                .ConfigureApplicationParts(parts => 
+                    parts.AddApplicationPart(typeof(IUserGrain).Assembly).WithReferences())
                 .ConfigureLogging(logging => logging.AddConsole())
                 .ConfigureServices(services =>
                 {
@@ -40,6 +47,7 @@ namespace Api.Orleans
                             config.ConfigureAccessTokenVerifierOptions = options =>
                             {
                                 options.InMemoryCacheEnabled = true;
+                                options.DisableCertificateValidation = true;
                             };
 
                             config.TracingEnabled = true;
@@ -53,10 +61,10 @@ namespace Api.Orleans
         }
 
         private static IClusterClient TryToConnect(IHttpContextAccessor httpContextAccessor, 
+            ILogger logger,
             IdentityServer4Info identityServer4Info)
         {
             var attempt = 0;
-            //var logger = loggerFactory.CreateLogger<OrleansClusterClientProvider>();
 
             while (true)
             {
@@ -65,7 +73,7 @@ namespace Api.Orleans
                     var client = Build(httpContextAccessor, identityServer4Info);
                     client.Connect().Wait();
 
-                    //logger.LogInformation("Client successfully connect to silo host");
+                    logger.LogInformation("Api Client successfully connect to Silo host");
 
                     return client;
                 }
@@ -74,7 +82,7 @@ namespace Api.Orleans
                     if (ex.InnerException is SiloUnavailableException)
                     {
                         attempt++;
-                        //logger.LogError(ex, ex.Message);
+                        logger.LogError(ex, ex.Message);
 
                         if (attempt > _initializeAttemptsBeforeFailing)
                         {
@@ -84,19 +92,23 @@ namespace Api.Orleans
                         Task.Delay(TimeSpan.FromSeconds(1));
                     }
 
-                    //logger.LogError(ex, ex.Message);
+                    logger.LogError(ex, ex.Message);
                 }
             }
         }
 
         public static void StartClientWithRetries(out IClusterClient client, 
-            IHttpContextAccessor httpContextAccessor, IdentityServer4Info identityServer4Info)
+            IHttpContextAccessor httpContextAccessor, ILogger logger, 
+            IdentityServer4Info identityServer4Info,
+            string simpleClusterAzureStorageConnection)
         {
+            _simpleClusterAzureStorageConnection = simpleClusterAzureStorageConnection;
+
             if (_client != null && _client.IsInitialized)
             {
                 client = _client;
             }
-            _client = TryToConnect(httpContextAccessor, identityServer4Info);
+            _client = TryToConnect(httpContextAccessor, logger, identityServer4Info);
             client = _client;
         }
     }
