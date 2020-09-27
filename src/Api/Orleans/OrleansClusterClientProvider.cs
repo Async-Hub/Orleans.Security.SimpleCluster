@@ -26,10 +26,14 @@ namespace Api.Orleans
             IdentityServer4Info identityServer4Info)
         {
             var builder = new ClientBuilder()
+#if DEBUG
+                .UseLocalhostClustering()
+#else
                 .UseAzureStorageClustering(options =>
                 {
                     options.ConnectionString = _simpleClusterAzureStorageConnection;
                 })
+#endif
                 .Configure<ClusterOptions>(options =>
                 {
                     options.ClusterId = "Orleans.Security.Test";
@@ -47,7 +51,11 @@ namespace Api.Orleans
                             config.ConfigureAccessTokenVerifierOptions = options =>
                             {
                                 options.InMemoryCacheEnabled = true;
-                                options.DisableCertificateValidation = true;
+                            };
+                            config.ConfigureSecurityOptions = options =>
+                            {
+                                //For not production environments only!
+                                options.RequireHttps = false;
                             };
 
                             config.TracingEnabled = true;

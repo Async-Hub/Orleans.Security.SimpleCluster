@@ -10,6 +10,7 @@ COPY ["src/SiloHost1/SiloHost1.csproj", "src/SiloHost1/"]
 COPY ["src/Common/Common.csproj", "src/Common/"]
 COPY ["src/Grains/Grains.csproj", "src/Grains/"]
 COPY ["src/Interfaces/GrainsInterfaces.csproj", "src/Interfaces/"]
+RUN dotnet nuget add source https://pkgs.dev.azure.com/asynchub/Orleans.Security/_packaging/Orleans.Security%40Local/nuget/v3/index.json
 RUN dotnet restore "src/SiloHost1/SiloHost1.csproj"
 COPY . .
 WORKDIR "/src/src/SiloHost1"

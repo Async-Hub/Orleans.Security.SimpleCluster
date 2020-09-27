@@ -12,7 +12,7 @@
   },
   "variables": {
     "storageAccountName": "stacgaci",
-    "containerIPv4Address": "",
+    "containerHostAddress": "",
     "InstrumentationKey": "",
     "webclientContainerName": "webclient",
     "webclientContainerImage": "acraci.azurecr.io/webclient:latest",
@@ -35,12 +35,28 @@
       "location": "[resourceGroup().location]"
     },
     {
+      "type": "microsoft.insights/components",
+      "apiVersion": "2018-05-01-preview",
+      "name": "appi-acg-sample",
+      "location": "[resourceGroup().location]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "Flow_Type": "Redfield",
+        "Request_Source": "IbizaAIExtension",
+        "RetentionInDays": 90,
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
       "name": "[parameters('containerGroupName')]",
       "type": "Microsoft.ContainerInstance/containerGroups",
       "apiVersion": "2019-12-01",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('microsoft.insights/components', 'appi-acg-sample')]"
       ],
       "properties": {
         "containers": [
@@ -65,11 +81,11 @@
               "environmentVariables": [
                 {
                   "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
-                  "value": "[concat('http://',variables('containerIPv4Address'),':','8083')]"
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8083')]"
                 },
                 {
                   "name": "SIMPLE_CLUSTER_API_SERVER_URL",
-                  "value": "[concat('http://',variables('containerIPv4Address'),':','8085')]"
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8085')]"
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
@@ -99,7 +115,7 @@
               "environmentVariables": [
                 {
                   "name": "SIMPLE_CLUSTER_WEB_CLIENT_SERVER_URL",
-                  "value": "[concat('http://',variables('containerIPv4Address'),':','8081')]"
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8081')]"
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
@@ -133,7 +149,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
-                  "value": "[concat('http://',variables('containerIPv4Address'),':','8083')]"
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8083')]"
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
@@ -167,7 +183,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
-                  "value": "[concat('http://',variables('containerIPv4Address'),':','8085')]"
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8085')]"
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
@@ -187,6 +203,7 @@
         "osType": "Linux",
         "ipAddress": {
           "type": "Public",
+          "dnsNameLabel": "acg-aci-sample",
           "ports": [
             {
               "protocol": "tcp",
@@ -226,7 +243,7 @@
     }
   ],
   "outputs": {
-    "containerIPv4Address": {
+    "containerHostAddress": {
       "type": "string",
       "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups/', parameters('containerGroupName'))).ipAddress.ip]"
     }

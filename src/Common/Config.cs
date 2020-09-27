@@ -4,7 +4,7 @@ namespace Common
 {
     public static class Config
     {
-        public static string InstrumentationKey => Resolver.InstrKey ?? "77819706-f7c4-41be-8b56";
+        public static string InstrumentationKey => Resolver.InstrKey ?? "da702040-864c-4824";
 
         public static string NativeClientUrl => "http://127.0.0.1:5010";
 

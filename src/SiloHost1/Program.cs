@@ -34,7 +34,7 @@ namespace SiloHost1
                 Console.WriteLine("Press Enter to terminate...");
                 Console.ReadLine();
 
-                await host.StopAsync();          
+                await host.StopAsync();
 #endif
             }
             catch (Exception ex)
@@ -64,35 +64,23 @@ namespace SiloHost1
                 .UseOrleans((context, siloBuilder) =>
                 {
                     siloBuilder
-                        //.UseTransactions()
+#if DEBUG
+                        .UseLocalhostClustering()
+#else
                         .UseAzureStorageClustering(options =>
                         {
                             options.ConnectionString = simpleClusterAzureStorageConnection;
                         })
+#endif
                         // Configure ClusterId and ServiceId
                         .Configure<ClusterOptions>(options =>
                         {
                             options.ClusterId = "Orleans.Security.Test";
                             options.ServiceId = "ServiceId1";
                         })
-                        .ConfigureEndpoints(Dns.GetHostName(),siloPort: 11111, gatewayPort: 30000)
-                        // Configure connectivity
-                        //.Configure<EndpointOptions>(options =>
-                        //    {
-                        //        // Port to use for Silo-to-Silo
-                        //        options.SiloPort = 11111;
-                        //        // Port to use for the gateway
-                        //        options.GatewayPort = 30000;
-                        //        // IP Address to advertise in the cluster
-                        //        options.AdvertisedIPAddress = IPAddress.Parse("51.105.185.51");
-                        //        // The socket used for silo-to-silo will bind to this endpoint
-                        //        options.GatewayListeningEndpoint = 
-                        //            new IPEndPoint(IPAddress.Any, 40000);
-                        //        // The socket used by the gateway will bind to this endpoint
-                        //        options.SiloListeningEndpoint =  
-                        //            new IPEndPoint(IPAddress.Any, 50000);
-
-                        //})
+#if !DEBUG
+                        .ConfigureEndpoints(Dns.GetHostName(), siloPort: 11111, gatewayPort: 30000)
+#endif
                         .ConfigureApplicationParts(parts =>
                             parts.AddApplicationPart(typeof(UserGrain).Assembly).WithReferences())
                         .ConfigureServices(services =>
@@ -102,10 +90,10 @@ namespace SiloHost1
                                 {
                                     config.ConfigureAuthorizationOptions = AuthorizationConfig.ConfigureOptions;
                                     config.TracingEnabled = true;
-                                    config.ConfigureAccessTokenVerifierOptions = options =>
+                                    config.ConfigureSecurityOptions = options =>
                                     {
                                         //For not production environments only!
-                                        options.DisableCertificateValidation = true;
+                                        options.RequireHttps = false;
                                     };
                                 });
                         });
