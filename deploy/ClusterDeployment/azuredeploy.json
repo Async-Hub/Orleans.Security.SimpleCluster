@@ -12,8 +12,8 @@
   },
   "variables": {
     "storageAccountName": "stacgaci",
-    "containerHostAddress": "",
-    "InstrumentationKey": "",
+    "containerHostAddress": "acg-aci-sample.westeurope.azurecontainer.io",
+    "InstrumentationKey": "da702040-864c-4824-a382-6fe082bbfe90",
     "webclientContainerName": "webclient",
     "webclientContainerImage": "acraci.azurecr.io/webclient:latest",
     "identityserverContainerName": "identityserver",
@@ -183,7 +183,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
-                  "value": "[concat('http://',variables('containerHostAddress'),':','8085')]"
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8083')]"
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",

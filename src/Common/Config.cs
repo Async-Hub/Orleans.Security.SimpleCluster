@@ -8,9 +8,9 @@ namespace Common
 
         public static string NativeClientUrl => "http://127.0.0.1:5010";
 
-        public static string ApiUrl => Resolver.ApiServerUrl ?? "https://localhost:5002";
-        public static string IdentityServerUrl => Resolver.IdsServerUrl ?? "https://localhost:5001";
-        public static string WebClientUrl => Resolver.WebServerUrl ?? "https://localhost:5004";
+        public static string ApiUrl => Resolver.ApiServerUrl ?? "http://localhost:5002";
+        public static string IdentityServerUrl => Resolver.IdsServerUrl ?? "http://localhost:5000";
+        public static string WebClientUrl => Resolver.WebServerUrl ?? "http://localhost:5004";
 
         //public static string ApiUrl => "http://api.appi.asynchub.org";
         //public static string IdentityServerUrl => "https://identity.appi.asynchub.org";

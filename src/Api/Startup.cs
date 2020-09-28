@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using Api.Orleans;
 using Common;
 using IdentityModel.AspNetCore.OAuth2Introspection;
+using IdentityModel.Client;
 using IdentityServer4.AccessTokenValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using Orleans;
 using Orleans.Security;
 using static Common.HttpClientExtensions;
@@ -73,6 +76,8 @@ namespace Api
                         oAuth2IntrospectionOptions.ClientId = apiIdentityServer4Info.ClientId;
                         oAuth2IntrospectionOptions.ClientSecret = apiIdentityServer4Info.ClientSecret;
                         oAuth2IntrospectionOptions.SaveToken = true;
+                        // Do not use this for production!
+                        oAuth2IntrospectionOptions.DiscoveryPolicy.RequireHttps = false;
                     });
 
             services.AddControllers();
@@ -102,7 +107,7 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseRouting();
