@@ -33,6 +33,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deploy", "deploy", "{70D8D5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{445EE7DF-EAF8-40CC-B860-89E4A6DCF92F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ClusterDeploymentApp", "deploy\ClusterDeploymentApp\ClusterDeploymentApp.fsproj", "{A3849FA4-DDCD-4F90-91D1-6B614B40B99F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,10 @@ Global
 		{C5230D86-13E3-47AB-AC0C-51A189EC2336}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5230D86-13E3-47AB-AC0C-51A189EC2336}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5230D86-13E3-47AB-AC0C-51A189EC2336}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3849FA4-DDCD-4F90-91D1-6B614B40B99F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3849FA4-DDCD-4F90-91D1-6B614B40B99F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3849FA4-DDCD-4F90-91D1-6B614B40B99F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3849FA4-DDCD-4F90-91D1-6B614B40B99F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -101,6 +107,7 @@ Global
 		{70B840FC-8261-46DE-8642-1B826DB1A77D} = {445EE7DF-EAF8-40CC-B860-89E4A6DCF92F}
 		{1831796D-6B0C-47E8-B064-44A1E049DB0C} = {70B840FC-8261-46DE-8642-1B826DB1A77D}
 		{C5230D86-13E3-47AB-AC0C-51A189EC2336} = {70D8D567-05B0-4A7F-8821-34E3678C8612}
+		{A3849FA4-DDCD-4F90-91D1-6B614B40B99F} = {70D8D567-05B0-4A7F-8821-34E3678C8612}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FBB66F26-9832-4060-9DE1-A6397574D760}
