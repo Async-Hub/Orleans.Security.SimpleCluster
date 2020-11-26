@@ -12,8 +12,8 @@
   },
   "variables": {
     "storageAccountName": "stacgaci",
-    "containerHostAddress": "acg-aci-sample.westeurope.azurecontainer.io",
-    "InstrumentationKey": "da702040-864c-4824-a382-6fe082bbfe90",
+    "containerHostAddress": "acg-aci-sample.northeurope.azurecontainer.io",
+    "InstrumentationKey": "8bb5db66-1430-4446-ae28-09e3fac4f2dc",
     "webclientContainerName": "webclient",
     "webclientContainerImage": "acraci.azurecr.io/webclient:latest",
     "identityserverContainerName": "identityserver",
@@ -21,7 +21,9 @@
     "silohost1ContainerName": "silohost1",
     "silohost1ContainerImage": "acraci.azurecr.io/silohost1:latest",
     "apiContainerName": "api",
-    "apiContainerImage": "acraci.azurecr.io/api:latest"
+    "apiContainerImage": "acraci.azurecr.io/api:latest",
+    "reactwebclientContainerName": "reactwebclient",
+    "reactwebclientContainerImage": "acraci.azurecr.io/reactwebclient:latest"
   },
   "resources": [
     {
@@ -66,7 +68,7 @@
               "image": "[variables('webclientContainerImage')]",
               "resources": {
                 "requests": {
-                  "cpu": 1,
+                  "cpu": 0.5,
                   "memoryInGb": 0.5
                 }
               },
@@ -100,7 +102,7 @@
               "image": "[variables('identityserverContainerImage')]",
               "resources": {
                 "requests": {
-                  "cpu": 1,
+                  "cpu":0.5,
                   "memoryInGb": 0.5
                 }
               },
@@ -130,7 +132,7 @@
               "image": "[variables('silohost1ContainerImage')]",
               "resources": {
                 "requests": {
-                  "cpu": 1,
+                  "cpu": 0.5,
                   "memoryInGb": 0.5
                 }
               },
@@ -164,7 +166,7 @@
               "image": "[variables('apiContainerImage')]",
               "resources": {
                 "requests": {
-                  "cpu": 1,
+                  "cpu": 0.5,
                   "memoryInGb": 0.5
                 }
               },
@@ -191,13 +193,43 @@
                 }
               ]
             }
+          },
+          {
+            "name": "[variables('reactwebclientContainerName')]",
+            "properties": {
+              "image": "[variables('reactwebclientContainerImage')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.5,
+                  "memoryInGb": 0.5
+                }
+              },
+              "ports": [
+                {
+                  "port": 8087
+                },
+                {
+                  "port": 8088
+                }
+              ],
+              "environmentVariables": [
+                {
+                  "name": "SIMPLE_CLUSTER_API_SERVER_URL",
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8085')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
+                  "value": "[variables('InstrumentationKey')]"
+                }
+              ]
+            }
           }
         ],
         "imageRegistryCredentials": [
           {
             "server": "acraci.azurecr.io",
             "username": "acraci",
-            "password": "w3fth1G90BZ40n/TFZmLqPy2w86Xcdus"
+            "password": "T7h0uDFEmkFBfCI26psOLI+5QSAvHtln"
           }
         ],
         "osType": "Linux",
@@ -228,6 +260,14 @@
             {
               "protocol": "tcp",
               "port": 8086
+            },
+            {
+              "protocol": "tcp",
+              "port": 8087
+            },
+            {
+              "protocol": "tcp",
+              "port": 8088
             },
             {
               "protocol": "tcp",
