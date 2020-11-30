@@ -1,10 +1,11 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ReactWebClient.Controllers;
 
 namespace ReactWebClient
 {
@@ -22,6 +23,10 @@ namespace ReactWebClient
         {
 
             services.AddControllersWithViews();
+            services.AddHttpClient("api",client =>
+            {
+                client.BaseAddress = new Uri(Common.Config.ApiUrl);
+            });
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
