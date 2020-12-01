@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -29,8 +28,12 @@ namespace ReactWebClient.Controllers
             if (response.IsSuccessStatusCode)
             {
                 var jsonString = await response.Content.ReadAsStringAsync();
-                var weatherForecast = 
-                    JsonSerializer.Deserialize<WeatherForecast[]>(jsonString);
+                var weatherForecast =
+                    JsonSerializer.Deserialize<WeatherForecast[]>(jsonString, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+
                 return weatherForecast;
             }
 
