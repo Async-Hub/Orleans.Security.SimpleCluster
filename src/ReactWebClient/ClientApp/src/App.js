@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { withAITracking } from '@microsoft/applicationinsights-react-js';
+import { reactPlugin, appInsights } from './AppInsights';
 import { Route } from 'react-router';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
@@ -20,3 +22,5 @@ export default class App extends Component {
     );
   }
 }
+
+export default withAITracking(reactPlugin, appInsights, App);
