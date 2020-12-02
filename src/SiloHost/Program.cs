@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using Common;
 using Grains;
@@ -14,7 +15,7 @@ using Orleans.Hosting;
 using Orleans.Security;
 using Orleans.Security.Clustering;
 
-namespace SiloHost1
+namespace SiloHost
 {
     internal static class Program
     {
@@ -23,7 +24,7 @@ namespace SiloHost1
             var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
             try
             {
-                Console.Title = "SiloHost1";
+                Console.Title = "SiloHost";
                 // Read Azure Storage connection string.
                 var simpleClusterAzureStorageConnection =
                     Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterAzureStorageConnection);
@@ -71,6 +72,14 @@ namespace SiloHost1
                         {
                             options.ConnectionString = simpleClusterAzureStorageConnection;
                         })
+                        .Configure<SiloOptions>(options => options.SiloName = Config.SiloHostName)
+                        .Configure<ClusterMembershipOptions>(options =>
+                        {
+                            options.NumVotesForDeathDeclaration = 1;
+                            options.TableRefreshTimeout = TimeSpan.FromSeconds(5);
+                            options.DeathVoteExpirationTimeout = TimeSpan.FromSeconds(5);
+                            options.IAmAliveTablePublishTimeout = TimeSpan.FromSeconds(3);
+                        })
 #endif
                         // Configure ClusterId and ServiceId
                         .Configure<ClusterOptions>(options =>
@@ -79,7 +88,8 @@ namespace SiloHost1
                             options.ServiceId = "ServiceId1";
                         })
 #if !DEBUG
-                        .ConfigureEndpoints(Dns.GetHostName(), siloPort: 11111, gatewayPort: 30000)
+                        .ConfigureEndpoints(Dns.GetHostName(), siloPort: 
+                            Config.SiloHostSiloPort, gatewayPort: Config.SiloHostGatewayPort)
 #endif
                         .ConfigureApplicationParts(parts =>
                             parts.AddApplicationPart(typeof(UserGrain).Assembly).WithReferences())
@@ -103,10 +113,13 @@ namespace SiloHost1
                 .ConfigureLogging(loggingBuilder =>
                 {
                     loggingBuilder.AddConsole();
-                    loggingBuilder.AddApplicationInsights(Common.Config.InstrumentationKey);
+                    loggingBuilder.AddApplicationInsights(Config.InstrumentationKey);
                 });
 
             var host = builder.Build();
+            var logger = host.Services.GetService<ILoggerFactory>().CreateLogger<ILogger>();
+            HostInfo.Log(logger);
+
             await host.StartAsync();
             return host;
         }

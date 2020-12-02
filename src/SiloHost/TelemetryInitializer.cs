@@ -1,8 +1,9 @@
-﻿using Microsoft.ApplicationInsights;
+﻿using Common;
+using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.ApplicationInsights.Extensibility;
 
-namespace SiloHost1
+namespace SiloHost
 {
     internal static class TelemetryInitializer
     {
@@ -18,8 +19,8 @@ namespace SiloHost1
             {
             }
 
-            telemetryClient.Context.Cloud.RoleInstance = "SiloHost1";
-            telemetryClient.Context.Cloud.RoleName = "SiloHost1";
+            telemetryClient.Context.Cloud.RoleInstance = Config.SiloHostName;
+            telemetryClient.Context.Cloud.RoleName = Config.SiloHostName;
 
             return telemetryClient;
         }

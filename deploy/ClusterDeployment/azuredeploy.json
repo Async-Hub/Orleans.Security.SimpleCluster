@@ -19,7 +19,8 @@
     "identityserverContainerName": "identityserver",
     "identityserverContainerImage": "acraci.azurecr.io/identityserver:latest",
     "silohost1ContainerName": "silohost1",
-    "silohost1ContainerImage": "acraci.azurecr.io/silohost1:latest",
+    "silohost2ContainerName": "silohost2",
+    "silohostContainerImage": "acraci.azurecr.io/silohost:latest",
     "apiContainerName": "api",
     "apiContainerImage": "acraci.azurecr.io/api:latest",
     "reactwebclientContainerName": "reactwebclient",
@@ -102,7 +103,7 @@
               "image": "[variables('identityserverContainerImage')]",
               "resources": {
                 "requests": {
-                  "cpu":0.5,
+                  "cpu": 0.5,
                   "memoryInGb": 0.5
                 }
               },
@@ -129,22 +130,80 @@
           {
             "name": "[variables('silohost1ContainerName')]",
             "properties": {
-              "image": "[variables('silohost1ContainerImage')]",
+              "image": "[variables('silohostContainerImage')]",
               "resources": {
                 "requests": {
                   "cpu": 0.5,
                   "memoryInGb": 0.5
                 }
               },
-              "ports": [
+              //"ports": [
+              //  {
+              //    "port": 11111
+              //  },
+              //  {
+              //    "port": 30000
+              //  }
+              //],
+              "environmentVariables": [
                 {
-                  "port": 11111
+                  "name": "SIMPLE_CLUSTER_SILO_HOST_NAME",
+                  "value": "SiloHost1"
                 },
                 {
-                  "port": 30000
+                  "name": "SIMPLE_CLUSTER_SILO_HOST_SILO_PORT",
+                  "value": "10000"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_SILO_HOST_GATEWAY_PORT",
+                  "value": "30000"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_AZURE_STORAGE_CONNECTION",
+                  "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId(resourceGroup().name,'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_IDENTITY_SERVER_URL",
+                  "value": "[concat('http://',variables('containerHostAddress'),':','8083')]"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
+                  "value": "[variables('InstrumentationKey')]"
                 }
-              ],
+              ]
+            }
+          },
+          {
+            "name": "[variables('silohost2ContainerName')]",
+            "properties": {
+              "image": "[variables('silohostContainerImage')]",
+              "resources": {
+                "requests": {
+                  "cpu": 0.5,
+                  "memoryInGb": 0.5
+                }
+              },
+              //"ports": [
+              //  {
+              //    "port": 10000
+              //  },
+              //  {
+              //    "port": 30000
+              //  }
+              //],
               "environmentVariables": [
+                {
+                  "name": "SIMPLE_CLUSTER_SILO_HOST_NAME",
+                  "value": "SiloHost2"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_SILO_HOST_SILO_PORT",
+                  "value": "10001"
+                },
+                {
+                  "name": "SIMPLE_CLUSTER_SILO_HOST_GATEWAY_PORT",
+                  "value": "30001"
+                },
                 {
                   "name": "SIMPLE_CLUSTER_AZURE_STORAGE_CONNECTION",
                   "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId(resourceGroup().name,'Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-04-01').keys[0].value,';EndpointSuffix=core.windows.net')]"
@@ -268,15 +327,15 @@
             {
               "protocol": "tcp",
               "port": 8088
-            },
-            {
-              "protocol": "tcp",
-              "port": 11111
-            },
-            {
-              "protocol": "tcp",
-              "port": 30000
-            }
+            }//,
+            //{
+            //  "protocol": "tcp",
+            //  "port": 11111
+            //},
+            //{
+            //  "protocol": "tcp",
+            //  "port": 30000
+            //}
           ]
         }
       }

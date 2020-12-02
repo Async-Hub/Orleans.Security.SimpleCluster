@@ -4,6 +4,12 @@ namespace Common
 {
     public static class Config
     {
+        public static string SiloHostName => Resolver.SiloName ?? "SiloHost";
+
+        public static int SiloHostSiloPort => Resolver.SiloPort ?? 10000;
+
+        public static int SiloHostGatewayPort => Resolver.SiloGatewayPort ?? 30000;
+
         public static string InstrumentationKey => Resolver.InstrKey ?? "da702040-864c-4824";
 
         public static string NativeClientUrl => "http://127.0.0.1:5010";
@@ -29,6 +35,29 @@ namespace Common
 
             public static string InstrKey =>
                 Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterInstrumentationKey);
+
+            public static string SiloName =>
+                Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterSiloHostName);
+
+            public static int? SiloPort
+            {
+                get
+                {
+                    var val = Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterSiloHostSiloPort);
+                    if (string.IsNullOrWhiteSpace(val)) return null;
+                    return int.Parse(val);
+                }
+            }
+
+            public static int? SiloGatewayPort
+            {
+                get
+                {
+                    var val = Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterSiloHostGatewayPort);
+                    if (string.IsNullOrWhiteSpace(val)) return null;
+                    return int.Parse(val);
+                }
+            }
         }
     }
 }

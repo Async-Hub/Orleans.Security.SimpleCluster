@@ -1,7 +1,8 @@
-﻿using Microsoft.ApplicationInsights.Channel;
+﻿using Common;
+using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 
-namespace SiloHost1
+namespace SiloHost
 {
     internal class MyTelemetryInitializer : ITelemetryInitializer
     {
@@ -9,7 +10,7 @@ namespace SiloHost1
 
         public MyTelemetryInitializer()
         {
-            _roleName = "SiloHost1";
+            _roleName = Config.SiloHostName;
         }
 
         public void Initialize(ITelemetry telemetry)
