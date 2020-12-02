@@ -28,7 +28,7 @@ namespace Api.Controllers
             {
                 return await grain.TakeSecret();
             }
-            catch (OrleansClusterUnauthorizedAccessException)
+            catch (NotAuthorizedException)
             {
                 return Unauthorized(LogMessages.AccessDenied);
             }

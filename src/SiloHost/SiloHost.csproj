@@ -26,7 +26,7 @@
     <PackageReference Include="Microsoft.Orleans.OrleansRuntime" Version="3.3.0" />
     <PackageReference Include="Microsoft.Orleans.Clustering.AzureStorage" Version="3.3.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-    <PackageReference Include="Orleans.Security.Clustering" Version="1.3.0-alpha0035" />
+    <PackageReference Include="Orleans.Security.Clustering" Version="1.3.0-alpha0036" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />

@@ -10,8 +10,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Orleans.Core.Abstractions" Version="3.3.0" />
-    <PackageReference Include="Orleans.Security.Interoperability" Version="1.3.0-alpha0035" />
-    <PackageReference Include="Orleans.Security.Authorization" Version="1.3.0-alpha0035" />
+    <PackageReference Include="Orleans.Security.Interoperability" Version="1.3.0-alpha0036" />
+    <PackageReference Include="Orleans.Security.Authorization" Version="1.3.0-alpha0036" />
   </ItemGroup>
 
   <ItemGroup>
