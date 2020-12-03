@@ -13,7 +13,6 @@
   "variables": {
     "storageAccountName": "stacgaci",
     "containerHostAddress": "acg-aci-sample.northeurope.azurecontainer.io",
-    "InstrumentationKey": "8bb5db66-1430-4446-ae28-09e3fac4f2dc",
     "webclientContainerName": "webclient",
     "webclientContainerImage": "acraci.azurecr.io/webclient:latest",
     "identityserverContainerName": "identityserver",
@@ -39,8 +38,23 @@
     },
     {
       "type": "microsoft.insights/components",
-      "apiVersion": "2018-05-01-preview",
-      "name": "appi-acg-sample",
+      "apiVersion": "2020-02-02-preview",
+      "name": "appi-acg-sample1",
+      "location": "[resourceGroup().location]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "Flow_Type": "Redfield",
+        "Request_Source": "IbizaAIExtension",
+        "RetentionInDays": 90,
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
+      "type": "microsoft.insights/components",
+      "apiVersion": "2020-02-02-preview",
+      "name": "appi-acg-sample2",
       "location": "[resourceGroup().location]",
       "kind": "web",
       "properties": {
@@ -59,7 +73,8 @@
       "location": "[resourceGroup().location]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
-        "[resourceId('microsoft.insights/components', 'appi-acg-sample')]"
+        "[resourceId('microsoft.insights/components', 'appi-acg-sample1')]",
+        "[resourceId('microsoft.insights/components', 'appi-acg-sample2')]"
       ],
       "properties": {
         "containers": [
@@ -92,7 +107,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[variables('InstrumentationKey')]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample2', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }
@@ -122,7 +137,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[variables('InstrumentationKey')]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample2', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }
@@ -137,14 +152,6 @@
                   "memoryInGb": 0.5
                 }
               },
-              //"ports": [
-              //  {
-              //    "port": 11111
-              //  },
-              //  {
-              //    "port": 30000
-              //  }
-              //],
               "environmentVariables": [
                 {
                   "name": "SIMPLE_CLUSTER_SILO_HOST_NAME",
@@ -168,7 +175,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[variables('InstrumentationKey')]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample1', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }
@@ -183,14 +190,6 @@
                   "memoryInGb": 0.5
                 }
               },
-              //"ports": [
-              //  {
-              //    "port": 10000
-              //  },
-              //  {
-              //    "port": 30000
-              //  }
-              //],
               "environmentVariables": [
                 {
                   "name": "SIMPLE_CLUSTER_SILO_HOST_NAME",
@@ -214,7 +213,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[variables('InstrumentationKey')]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample1', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }
@@ -248,7 +247,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[variables('InstrumentationKey')]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample1', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }
@@ -278,7 +277,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[variables('InstrumentationKey')]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample2', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }
@@ -327,15 +326,7 @@
             {
               "protocol": "tcp",
               "port": 8088
-            }//,
-            //{
-            //  "protocol": "tcp",
-            //  "port": 11111
-            //},
-            //{
-            //  "protocol": "tcp",
-            //  "port": 30000
-            //}
+            }
           ]
         }
       }
