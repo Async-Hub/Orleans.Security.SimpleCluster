@@ -44,6 +44,7 @@
       "kind": "web",
       "properties": {
         "Application_Type": "web",
+        "DisableIpMasking": true,
         "Flow_Type": "Redfield",
         "Request_Source": "IbizaAIExtension",
         "RetentionInDays": 90,
@@ -59,6 +60,7 @@
       "kind": "web",
       "properties": {
         "Application_Type": "web",
+        "DisableIpMasking": true,
         "Flow_Type": "Redfield",
         "Request_Source": "IbizaAIExtension",
         "RetentionInDays": 90,

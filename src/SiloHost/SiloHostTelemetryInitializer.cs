@@ -4,11 +4,11 @@ using Microsoft.ApplicationInsights.Extensibility;
 
 namespace SiloHost
 {
-    internal class MyTelemetryInitializer : ITelemetryInitializer
+    internal class SiloHostTelemetryInitializer : ITelemetryInitializer
     {
         private readonly string _roleName;
 
-        public MyTelemetryInitializer()
+        public SiloHostTelemetryInitializer()
         {
             _roleName = Config.SiloHostName;
         }

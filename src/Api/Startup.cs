@@ -7,6 +7,7 @@ using Common;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using IdentityModel.Client;
 using IdentityServer4.AccessTokenValidation;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -89,11 +90,14 @@ namespace Api
             services.AddSingleton<IClusterClient>(serviceProvider =>
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<IClusterClient>>();
-                OrleansClusterClientProvider.StartClientWithRetries(out var client,
-                    serviceProvider.GetService<IHttpContextAccessor>(), 
-                    logger,
-                    clusterIdentityServer4Info,
-                    simpleClusterAzureStorageConnection);
+                var telemetryClient = serviceProvider.GetRequiredService<TelemetryClient>();
+
+                var provider = new OrleansClusterClientProvider(
+                    serviceProvider.GetService<IHttpContextAccessor>(),
+                    logger, clusterIdentityServer4Info, simpleClusterAzureStorageConnection,
+                    telemetryClient);
+
+                provider.StartClientWithRetries(out var client);
 
                 return client;
             });

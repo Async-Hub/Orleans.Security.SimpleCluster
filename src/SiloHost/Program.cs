@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Common;
 using Grains;
 using GrainsInterfaces;
+using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,9 +21,11 @@ namespace SiloHost
 {
     internal static class Program
     {
+        private static TelemetryClient _telemetryClient;
+
         public static async Task Main(string[] args)
         {
-            var telemetryClient = TelemetryInitializer.CreateTelemetryClient();
+            _telemetryClient = TelemetryInitializer.CreateTelemetryClient();
             try
             {
                 Console.Title = "SiloHost";
@@ -40,11 +44,11 @@ namespace SiloHost
             }
             catch (Exception ex)
             {
-                telemetryClient.TrackException(ex);
+                _telemetryClient.TrackException(ex);
                 Console.WriteLine(ex);
             }
 
-            telemetryClient.Flush();
+            _telemetryClient.Flush();
         }
 
         private static async Task<IHost> StartSilo(string simpleClusterAzureStorageConnection)
@@ -56,10 +60,12 @@ namespace SiloHost
                 .UseEnvironment(Environments.Staging)
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
+                    services.AddSingleton<ITelemetryInitializer>(serviceProvider => 
+                        TelemetryInitializer.SiloHostTelemetryInitializer);
+
                     services.AddApplicationInsightsTelemetryWorkerService(options =>
                     {
-                        options.InstrumentationKey = Common.Config.InstrumentationKey;
+                        options.InstrumentationKey = Config.InstrumentationKey;
                     });
                 })
                 .UseOrleans((context, siloBuilder) =>
@@ -113,7 +119,6 @@ namespace SiloHost
                 .ConfigureLogging(loggingBuilder =>
                 {
                     loggingBuilder.AddConsole();
-                    loggingBuilder.AddApplicationInsights(Config.InstrumentationKey);
                 });
 
             var host = builder.Build();
