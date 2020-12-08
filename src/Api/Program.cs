@@ -35,9 +35,9 @@ namespace Api
                         .Build();
 
                     // ApplicationInsights
-                    services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
-                    //services.AddSnapshotCollector((configuration) =>
-                    //    config.Bind(nameof(SnapshotCollectorConfiguration), configuration));
+                    services.AddSingleton<ITelemetryInitializer, ApiTelemetryInitializer>();
+                    services.AddSnapshotCollector((configuration) =>
+                        config.Bind(nameof(SnapshotCollectorConfiguration), configuration));
                     services.AddApplicationInsightsTelemetry();
                 })
                 .ConfigureWebHostDefaults(webBuilder =>

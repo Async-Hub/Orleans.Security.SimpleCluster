@@ -11,6 +11,7 @@ namespace Api.Orleans
     {
         private readonly TelemetryClient _telemetryClient;
 
+
         public ApplicationInsightsGrainCallFilter(TelemetryClient telemetryClient)
         {
             _telemetryClient = telemetryClient;
@@ -19,7 +20,7 @@ namespace Api.Orleans
         public async Task Invoke(IOutgoingGrainCallContext context)
         {
             using var operation = _telemetryClient
-                .StartOperation<RequestTelemetry>(Common.Config.SiloHostName);
+                .StartOperation<DependencyTelemetry>(Common.Config.SiloHostName);
             //var dependencyTelemetry = CreateRequestTelemetry(_telemetryClient.Context);
             //var operation = _telemetryClient.StartOperation(dependencyTelemetry);
 
@@ -28,8 +29,8 @@ namespace Api.Orleans
                 await context.Invoke();
 
                 operation.Telemetry.Success = true;
-                operation.Telemetry.Context.Cloud.RoleInstance = Common.Config.SiloHostName;
-                operation.Telemetry.Context.Cloud.RoleName = Common.Config.SiloHostName;
+                operation.Telemetry.Context.Cloud.RoleName = "SiloHost";
+                //operation.Telemetry.Context.Cloud.RoleInstance = _clusterClient.;
                 //operation.Context.Component.Version = Common.Config.SiloHostName;
 
                 _telemetryClient.StopOperation(operation);
