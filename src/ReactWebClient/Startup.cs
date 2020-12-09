@@ -1,11 +1,12 @@
 using System;
+using Common;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ReactWebClient.Controllers;
 
 namespace ReactWebClient
 {
@@ -33,6 +34,9 @@ namespace ReactWebClient
             {
                 configuration.RootPath = "ClientApp/build";
             });
+
+            services.AddSingleton<ITelemetryInitializer, ReactWebClientTelemetryInitializer>();
+            services.AddApplicationInsightsTelemetry(Config.InstrumentationKey);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

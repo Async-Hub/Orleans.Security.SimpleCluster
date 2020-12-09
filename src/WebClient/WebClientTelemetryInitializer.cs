@@ -3,11 +3,11 @@ using Microsoft.ApplicationInsights.Extensibility;
 
 namespace WebClient
 {
-    internal class MyTelemetryInitializer : ITelemetryInitializer
+    internal class WebClientTelemetryInitializer : ITelemetryInitializer
     {
         private readonly string _roleName;
 
-        public MyTelemetryInitializer()
+        public WebClientTelemetryInitializer()
         {
             _roleName = "WebClient";
         }

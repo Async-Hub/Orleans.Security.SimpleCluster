@@ -32,7 +32,7 @@ namespace WebClient
                         .Build();
 
                     // ApplicationInsights
-                    services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
+                    services.AddSingleton<ITelemetryInitializer, WebClientTelemetryInitializer>();
                     services.AddSnapshotCollector((configuration) =>
                         config.Bind(nameof(SnapshotCollectorConfiguration), configuration));
                     services.AddApplicationInsightsTelemetry();

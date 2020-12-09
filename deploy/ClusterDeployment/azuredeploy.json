@@ -279,7 +279,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[reference('microsoft.insights/components/appi-acg-sample2', '2020-02-02-preview').InstrumentationKey]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample3', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }
