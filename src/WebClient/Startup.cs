@@ -40,6 +40,11 @@ namespace WebClient
                     () => factory.CreateClient());
             });
 
+            services.AddHttpClient("api", client =>
+            {
+                client.BaseAddress = new Uri(Common.Config.ApiUrl);
+            });
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;

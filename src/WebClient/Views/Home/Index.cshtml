@@ -1,17 +1,7 @@
 ﻿@{
-    Layout = null;
+    ViewData["Title"] = "Home";
 }
-
-<!DOCTYPE html>
-
-<html>
-<head>
-    <meta name="viewport" content="width=device-width"/>
-    <title>Index</title>
-</head>
-<body>
 <br/>
-<a asp-action="UserProfile">Go to protected page</a>
-<a asp-action="Slow">This is a very slow page</a>
-</body>
-</html>
+<ul class="navbar-nav flex-grow-1">
+    <li class="nav-item"><a asp-action="Slow">This is a very slow page</a></li>
+</ul>

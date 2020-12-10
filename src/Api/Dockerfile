@@ -10,6 +10,7 @@ WORKDIR /src
 COPY ["src/Api/Api.csproj", "src/Api/"]
 COPY ["src/Interfaces/GrainsInterfaces.csproj", "src/Interfaces/"]
 COPY ["src/Common/Common.csproj", "src/Common/"]
+RUN dotnet nuget add source https://pkgs.dev.azure.com/asynchub/Orleans.Security/_packaging/Orleans.Security%40Local/nuget/v3/index.json
 RUN dotnet restore "src/Api/Api.csproj"
 COPY . .
 WORKDIR "/src/src/Api"

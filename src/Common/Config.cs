@@ -4,13 +4,19 @@ namespace Common
 {
     public static class Config
     {
-        public static string InstrumentationKey => Resolver.InstrKey ?? "77819706-f7c4-41be-8b56";
+        public static string SiloHostName => Resolver.SiloName ?? "SiloHost";
+
+        public static int SiloHostSiloPort => Resolver.SiloPort ?? 10000;
+
+        public static int SiloHostGatewayPort => Resolver.SiloGatewayPort ?? 30000;
+
+        public static string InstrumentationKey => Resolver.InstrKey ?? "a61e36d5-2057-11e7a8e905ae";
 
         public static string NativeClientUrl => "http://127.0.0.1:5010";
 
-        public static string ApiUrl => Resolver.ApiServerUrl ?? "https://localhost:5002";
-        public static string IdentityServerUrl => Resolver.IdsServerUrl ?? "https://localhost:5001";
-        public static string WebClientUrl => Resolver.WebServerUrl ?? "https://localhost:5004";
+        public static string ApiUrl => Resolver.ApiServerUrl ?? "http://localhost:5002";
+        public static string IdentityServerUrl => Resolver.IdsServerUrl ?? "http://localhost:5000";
+        public static string WebClientUrl => Resolver.WebServerUrl ?? "http://localhost:5004";
 
         //public static string ApiUrl => "http://api.appi.asynchub.org";
         //public static string IdentityServerUrl => "https://identity.appi.asynchub.org";
@@ -29,6 +35,29 @@ namespace Common
 
             public static string InstrKey =>
                 Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterInstrumentationKey);
+
+            public static string SiloName =>
+                Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterSiloHostName);
+
+            public static int? SiloPort
+            {
+                get
+                {
+                    var val = Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterSiloHostSiloPort);
+                    if (string.IsNullOrWhiteSpace(val)) return null;
+                    return int.Parse(val);
+                }
+            }
+
+            public static int? SiloGatewayPort
+            {
+                get
+                {
+                    var val = Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterSiloHostGatewayPort);
+                    if (string.IsNullOrWhiteSpace(val)) return null;
+                    return int.Parse(val);
+                }
+            }
         }
     }
 }

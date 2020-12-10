@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using Api.Orleans;
 using Common;
 using IdentityModel.AspNetCore.OAuth2Introspection;
+using IdentityModel.Client;
 using IdentityServer4.AccessTokenValidation;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using Orleans;
 using Orleans.Security;
 using static Common.HttpClientExtensions;
@@ -73,6 +77,8 @@ namespace Api
                         oAuth2IntrospectionOptions.ClientId = apiIdentityServer4Info.ClientId;
                         oAuth2IntrospectionOptions.ClientSecret = apiIdentityServer4Info.ClientSecret;
                         oAuth2IntrospectionOptions.SaveToken = true;
+                        // Do not use this for production!
+                        oAuth2IntrospectionOptions.DiscoveryPolicy.RequireHttps = false;
                     });
 
             services.AddControllers();
@@ -84,11 +90,14 @@ namespace Api
             services.AddSingleton<IClusterClient>(serviceProvider =>
             {
                 var logger = serviceProvider.GetRequiredService<ILogger<IClusterClient>>();
-                OrleansClusterClientProvider.StartClientWithRetries(out var client,
-                    serviceProvider.GetService<IHttpContextAccessor>(), 
-                    logger,
-                    clusterIdentityServer4Info,
-                    simpleClusterAzureStorageConnection);
+                var telemetryClient = serviceProvider.GetRequiredService<TelemetryClient>();
+
+                var provider = new OrleansClusterClientProvider(
+                    serviceProvider.GetService<IHttpContextAccessor>(),
+                    logger, clusterIdentityServer4Info, simpleClusterAzureStorageConnection,
+                    telemetryClient);
+
+                provider.StartClientWithRetries(out var client);
 
                 return client;
             });
@@ -102,7 +111,7 @@ namespace Api
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthentication();
             app.UseRouting();

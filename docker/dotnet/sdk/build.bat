@@ -1,0 +1,1 @@
+docker build . --tag "acraci.azurecr.io/dotnet/sdk:5.0-buster-slim"

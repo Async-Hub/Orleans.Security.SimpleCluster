@@ -14,7 +14,12 @@ namespace WebClient
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var host = CreateHostBuilder(args).Build();
+
+            var logger = host.Services.GetService<ILoggerFactory>().CreateLogger<ILogger>();
+            HostInfo.Log(logger);
+
+            host.Run();
         }
 
         private static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -27,7 +32,7 @@ namespace WebClient
                         .Build();
 
                     // ApplicationInsights
-                    services.AddSingleton<ITelemetryInitializer, MyTelemetryInitializer>();
+                    services.AddSingleton<ITelemetryInitializer, WebClientTelemetryInitializer>();
                     services.AddSnapshotCollector((configuration) =>
                         config.Bind(nameof(SnapshotCollectorConfiguration), configuration));
                     services.AddApplicationInsightsTelemetry();
