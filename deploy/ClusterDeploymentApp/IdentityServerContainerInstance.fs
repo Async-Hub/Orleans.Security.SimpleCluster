@@ -14,9 +14,6 @@ let acgacisample (instrumentationKey) =
         //add_ports InternalPort [ 9090us; ]
         memory 0.5<Gb>
         cpu_cores 1
-        env_vars [
-            env_var EnvironmentVariables.SimpleClusterInstrumentationKey instrumentationKey
-        ]
     }
 
     let containerGroup = containerGroup {

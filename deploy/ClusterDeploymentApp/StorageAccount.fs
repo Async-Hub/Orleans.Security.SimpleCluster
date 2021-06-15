@@ -5,5 +5,5 @@ open Farmer.Builders
 
 let stacgaci = storageAccount {
     name "stacgaci"
-    sku Storage.Standard_LRS
+    sku Storage.Sku.Standard_LRS
 }
