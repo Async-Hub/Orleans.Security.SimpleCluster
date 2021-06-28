@@ -91,6 +91,22 @@
       }
     },
     {
+      "type": "microsoft.insights/components",
+      "apiVersion": "2020-02-02-preview",
+      "name": "appi-acg-sample3",
+      "location": "[resourceGroup().location]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web",
+        "DisableIpMasking": true,
+        "Flow_Type": "Redfield",
+        "Request_Source": "IbizaAIExtension",
+        "RetentionInDays": 90,
+        "publicNetworkAccessForIngestion": "Enabled",
+        "publicNetworkAccessForQuery": "Enabled"
+      }
+    },
+    {
       "name": "[parameters('containerGroupName')]",
       "type": "Microsoft.ContainerInstance/containerGroups",
       "apiVersion": "2019-12-01",
@@ -301,7 +317,7 @@
                 },
                 {
                   "name": "SIMPLE_CLUSTER_INSTRUMENTATION_KEY",
-                  "value": "[reference('microsoft.insights/components/appi-acg-sample2', '2020-02-02-preview').InstrumentationKey]"
+                  "value": "[reference('microsoft.insights/components/appi-acg-sample3', '2020-02-02-preview').InstrumentationKey]"
                 }
               ]
             }

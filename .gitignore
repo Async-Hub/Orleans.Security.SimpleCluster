@@ -351,3 +351,4 @@ MigrationBackup/
 /.idea/
 /src/Spa/.idea/
 /deploy/ClusterDeploymentApp/.farmer
+/src/Api/.config
