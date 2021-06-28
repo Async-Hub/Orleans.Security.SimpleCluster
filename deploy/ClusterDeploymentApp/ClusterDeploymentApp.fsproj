@@ -14,11 +14,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Farmer" Version="1.2.0" />
+    <PackageReference Include="Farmer" Version="1.6.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Common\Common.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="5.0.2" />
   </ItemGroup>
 
 </Project>
