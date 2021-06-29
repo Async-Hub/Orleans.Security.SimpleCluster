@@ -88,7 +88,7 @@ namespace Api
 
                 var provider = new OrleansClusterClientProvider(
                     serviceProvider.GetService<IHttpContextAccessor>(),
-                    logger, clusterIdentityServer4Info, simpleClusterAzureStorageConnection,
+                    logger, apiIdentityServer4Info, simpleClusterAzureStorageConnection,
                     telemetryClient);
 
                 provider.StartClientWithRetries(out var client);
