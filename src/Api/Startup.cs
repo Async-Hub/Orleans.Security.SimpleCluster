@@ -70,7 +70,8 @@ namespace Api
                 .AddOAuth2Introspection("introspection", options =>
                 {
                     options.Authority = apiIdentityServer4Info.Url;
-
+                    // For development environments only. Do not use for production.
+                    options.DiscoveryPolicy.RequireHttps = false;
                     options.ClientId = apiIdentityServer4Info.ClientId;
                     options.ClientSecret = apiIdentityServer4Info.ClientSecret;
                 });
