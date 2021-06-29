@@ -12,6 +12,7 @@ using Orleans.Hosting;
 using Orleans.Security;
 using Orleans.Security.Clustering;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace SiloHost
