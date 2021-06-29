@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using Api.Orleans;
+﻿using Api.Orleans;
 using Common;
+using IdentityModel.AspNetCore.AccessTokenValidation;
 using IdentityModel.AspNetCore.OAuth2Introspection;
-using IdentityModel.Client;
-using IdentityServer4.AccessTokenValidation;
 using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -17,9 +12,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.VisualBasic;
 using Orleans;
 using Orleans.Security;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using static Common.HttpClientExtensions;
 
 namespace Api
@@ -42,44 +38,42 @@ namespace Api
         public void ConfigureServices(IServiceCollection services)
         {
             //IdentityServer4 credentials. Do not use this for production!
-            var apiIdentityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
+            var apiIdentityServer4Info = new IdentityServer4Info(Config.IdentityServerUrl,
                 "Api1", @"TFGB=?Gf3UvH+Uqfu_5p", "Cluster");
-            var clusterIdentityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
+            var clusterIdentityServer4Info = new IdentityServer4Info(Config.IdentityServerUrl,
                 "Cluster", "@3x3g*RLez$TNU!_7!QW", "Cluster");
 
             // Read Azure Storage connection string.
             var simpleClusterAzureStorageConnection =
                 Environment.GetEnvironmentVariable(EnvironmentVariables.SimpleClusterAzureStorageConnection);
 
-            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddIdentityServerAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme,
-                    jwtBearerOptions =>
-                    {
-                        jwtBearerOptions.Authority = apiIdentityServer4Info.Url;
-                        jwtBearerOptions.RequireHttpsMetadata = false;
-                        jwtBearerOptions.SaveToken = true;
-                        jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters()
-                        {
-                            ValidateAudience = true,
-                            ValidAudiences = new List<string>(){ "Api1","Cluster" }
-                        };
+            services.AddAuthentication("token")
+                // JWT tokens
+                .AddJwtBearer("token", options =>
+                {
+                    // For development environments only. Do not use for production.
+                    options.RequireHttpsMetadata = false;
 
-                        //if (_env.IsDevelopment() || _env.IsStaging())
-                        //{
-                        //    options.JwtBackChannelHandler = CreateHttpClientHandler(true);
-                        //}
-
-                        jwtBearerOptions.BackchannelHttpHandler = CreateHttpClientHandler(true);
-                    },
-                    oAuth2IntrospectionOptions =>
+                    options.Authority = apiIdentityServer4Info.Url;
+                    options.Audience = "Api1";
+                    options.TokenValidationParameters.ValidTypes = new[] { "at+jwt" };
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        oAuth2IntrospectionOptions.Authority = apiIdentityServer4Info.Url;
-                        oAuth2IntrospectionOptions.ClientId = apiIdentityServer4Info.ClientId;
-                        oAuth2IntrospectionOptions.ClientSecret = apiIdentityServer4Info.ClientSecret;
-                        oAuth2IntrospectionOptions.SaveToken = true;
-                        // Do not use this for production!
-                        oAuth2IntrospectionOptions.DiscoveryPolicy.RequireHttps = false;
-                    });
+                        ValidateAudience = false
+                    };
+                    // if token does not contain a dot, it is a reference token
+                    // https://leastprivilege.com/2020/07/06/flexible-access-token-validation-in-asp-net-core/
+                    options.ForwardDefaultSelector = Selector.ForwardReferenceToken("introspection");
+                })
+
+                // reference tokens
+                .AddOAuth2Introspection("introspection", options =>
+                {
+                    options.Authority = apiIdentityServer4Info.Url;
+
+                    options.ClientId = apiIdentityServer4Info.ClientId;
+                    options.ClientSecret = apiIdentityServer4Info.ClientSecret;
+                });
 
             services.AddControllers();
             services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using Common;
+﻿using Common;
 using Grains;
 using GrainsInterfaces;
 using Microsoft.ApplicationInsights;
@@ -16,6 +11,8 @@ using Orleans.Configuration;
 using Orleans.Hosting;
 using Orleans.Security;
 using Orleans.Security.Clustering;
+using System;
+using System.Threading.Tasks;
 
 namespace SiloHost
 {
@@ -54,7 +51,7 @@ namespace SiloHost
         private static async Task<IHost> StartSilo(string simpleClusterAzureStorageConnection)
         {
             var identityServer4Info = new IdentityServer4Info(Common.Config.IdentityServerUrl,
-                "Cluster", "@3x3g*RLez$TNU!_7!QW", "Cluster");
+                "Api1", "@3x3g*RLez$TNU!_7!QW", "Cluster");
 
             var builder = new HostBuilder()
                 .UseEnvironment(Environments.Staging)
