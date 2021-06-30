@@ -1,7 +1,4 @@
-﻿using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http;
-using IdentityModel.Client;
+﻿using IdentityModel.Client;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http;
 using static Common.HttpClientExtensions;
 
 namespace WebClient
@@ -25,11 +25,11 @@ namespace WebClient
             _configuration = configuration;
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllersWithViews();
             services.AddHttpClient();
 
             services.AddSingleton<IDiscoveryCache>(serviceProvider =>
@@ -46,22 +46,25 @@ namespace WebClient
             });
 
             services.AddAuthentication(options =>
-                {
-                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-                })
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+            })
                 .AddCookie()
                 .AddOpenIdConnect(options =>
                 {
+                    // For development environments only. Do not use for production.
+                    options.RequireHttpsMetadata = false;
+
                     options.GetClaimsFromUserInfoEndpoint = true;
                     options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
                     options.Authority = Common.Config.IdentityServerUrl;
                     options.ClientId = "WebClient";
                     options.ClientSecret = "pckJ#MH-9f9K?+^Bzx&4";
-                    options.RequireHttpsMetadata = false;
 
-                    options.ResponseType = "code id_token";
+                    options.ResponseType = "code";
+                    options.UsePkce = true;
                     options.SaveTokens = true;
 
                     options.Scope.Add("Api1");
@@ -95,12 +98,7 @@ namespace WebClient
             app.UseRouting();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapDefaultControllerRoute(); });
         }
     }
 }

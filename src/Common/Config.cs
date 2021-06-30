@@ -10,7 +10,7 @@ namespace Common
 
         public static int SiloHostGatewayPort => Resolver.SiloGatewayPort ?? 30000;
 
-        public static string InstrumentationKey => Resolver.InstrKey ?? "a61e36d5-2057-11e7a8e905ae";
+        public static string InstrumentationKey => Resolver.InstrKey ?? "50903127-8e5f-4ad1";
 
         public static string NativeClientUrl => "http://127.0.0.1:5010";
 
